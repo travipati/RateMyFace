@@ -46,11 +46,11 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
 		b = (Button) findViewById(R.id.btToggle);
 		b.setOnClickListener(this);
 		
-/*		camera = Camera.open();
-		camera.setFaceDetectionListener(faceDetectionListener);
+		camera = Camera.open();
+//		camera.setFaceDetectionListener(faceDetectionListener);
 		
 		ScheduledExecutorService scheduleTaskExecutor = Executors.newScheduledThreadPool(5);
-		scheduleTaskExecutor.scheduleAtFixedRate(this, 0, 2, TimeUnit.SECONDS);*/
+		scheduleTaskExecutor.scheduleAtFixedRate(this, 0, 2, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
 		@Override
 		public void onFaceDetection(Face[] faces, Camera camera) {
 			if (faces.length == 1) {
-//				prompt.setText(" No Face Detected! ");
+//				prompt.setText("Face Detected!");
 			}
 		}
 	};
