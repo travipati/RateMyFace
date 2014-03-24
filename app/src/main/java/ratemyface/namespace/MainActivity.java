@@ -26,12 +26,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 
 public class MainActivity extends Activity implements OnClickListener, Runnable {
 
 	Camera camera;
 	Button b;
 	ImageView iv;
+    RatingBar rb;
 	boolean isCapturing = false;
 
 	@Override
@@ -42,7 +44,8 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
 	}
 	
 	private void initialize() {
-		iv = (ImageView) findViewById(R.id.ivFace);
+        rb = (RatingBar) findViewById(R.id.ratingBar);
+        iv = (ImageView) findViewById(R.id.ivFace);
 		b = (Button) findViewById(R.id.btToggle);
 		b.setOnClickListener(this);
 		
@@ -79,7 +82,7 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
 		@Override
 		public void onFaceDetection(Face[] faces, Camera camera) {
 			if (faces.length == 1) {
-//				prompt.setText("Face Detected!");
+                rb.setNumStars(0);
 			}
 		}
 	};
@@ -109,22 +112,22 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
 			Bitmap bmp = BitmapFactory.decodeStream(is);
 			iv.setImageBitmap(bmp);
 			
-			Uri uriTarget = getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, new ContentValues());
-			
+/*			Uri uriTarget = getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, new ContentValues());
+
 			OutputStream imageFileOS;
 			try {
 				imageFileOS = getContentResolver().openOutputStream(uriTarget);
 				imageFileOS.write(arg0);
 				imageFileOS.flush();
-				imageFileOS.close();				
+				imageFileOS.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			}  
+			}  */
 			
 			camera.startPreview();
-			camera.startFaceDetection();
+//			camera.startFaceDetection();
 		}
 	};
 
