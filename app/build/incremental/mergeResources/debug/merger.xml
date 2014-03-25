@@ -9,6 +9,16 @@
                 qualifiers="hdpi"
                 type="drawable" />
             <file
+                name="team_photo"
+                path="C:\Users\Teja\Documents\2014 Winter\EECS 545\RateMyFace\app\src\main\res\drawable-hdpi\team_photo.png"
+                qualifiers="hdpi"
+                type="drawable" />
+            <file
+                name="travipati"
+                path="C:\Users\Teja\Documents\2014 Winter\EECS 545\RateMyFace\app\src\main\res\drawable-hdpi\travipati.jpg"
+                qualifiers="hdpi"
+                type="drawable" />
+            <file
                 name="ic_launcher"
                 path="C:\Users\Teja\Documents\2014 Winter\EECS 545\RateMyFace\app\src\main\res\drawable-mdpi\ic_launcher.png"
                 qualifiers="mdpi"
@@ -101,6 +111,11 @@
                     <!-- API 14 theme customizations can go here. -->
                 </style>
             </file>
+            <file
+                name="n10680732"
+                path="C:\Users\Teja\Documents\2014 Winter\EECS 545\RateMyFace\app\src\main\res\drawable-hdpi\n10680732.jpg"
+                qualifiers="hdpi"
+                type="drawable" />
         </source>
         <source path="C:\Users\Teja\Documents\2014 Winter\EECS 545\RateMyFace\app\build\res\rs\debug" />
         <source path="C:\Users\Teja\Documents\2014 Winter\EECS 545\RateMyFace\app\build\res\generated\debug" />
