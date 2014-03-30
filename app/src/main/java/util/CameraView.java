@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
@@ -15,10 +16,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     final static String TAG = "CameraView";
@@ -77,26 +76,13 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
                     else
                         return;
 
-                    Camera.Size size = camera.getParameters().getPreviewSize();
-
-                    YuvImage yuvimage = new YuvImage(bytes, ImageFormat.NV21, size.width, size.height, null);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    yuvimage.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, baos);
-                    byte[] jdata = baos.toByteArray();
-                    BitmapFactory.Options bitmapFatoryOptions = new BitmapFactory.Options();
-                    bitmapFatoryOptions.inPreferredConfig = Bitmap.Config.RGB_565;
-                    Bitmap bmp = BitmapFactory.decodeByteArray(jdata, 0, jdata.length, bitmapFatoryOptions);
-
+                    Bitmap bmp = getBitmapFromBytes(bytes, camera);
                     if (bmp == null) {
                         Log.d(TAG, "Null Bitmap created");
                         return;
                     }
 
-                    FaceDetector.Face[] faces = new FaceDetector.Face[1];
-                    FaceDetector faceDetector = new FaceDetector(bmp.getWidth(), bmp.getHeight(), 1);
-                    faceDetector.findFaces(bmp, faces);
-                    int face_count = faceDetector.findFaces(bmp, faces);
-                    Log.d("FaceDetector", face_count + " faces found in the image");
+                    analyzeImage(bmp);
                 }
             });
 
@@ -105,5 +91,44 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         } catch (Exception e){
             Log.e(TAG, "Error starting camera preview: " + e.getMessage());
         }
+    }
+
+    private Bitmap getBitmapFromBytes(byte[] bytes, Camera camera){
+        Camera.Size size = camera.getParameters().getPreviewSize();
+
+        YuvImage yuvImage = new YuvImage(bytes, ImageFormat.NV21, size.width, size.height, null);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        yuvImage.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, baos);
+        byte[] jdata = baos.toByteArray();
+
+        BitmapFactory.Options bitmapFatoryOptions = new BitmapFactory.Options();
+        bitmapFatoryOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+        return BitmapFactory.decodeByteArray(jdata, 0, jdata.length, bitmapFatoryOptions);
+    }
+
+    private void analyzeImage(Bitmap bmp) {
+        FaceDetector faceDetector = new FaceDetector(bmp.getWidth(), bmp.getHeight(), 1);
+        FaceDetector.Face[] faces = new FaceDetector.Face[1];
+        faceDetector.findFaces(bmp, faces);
+
+        for (FaceDetector.Face face : faces) {
+            //filter bad ones
+            if (face.confidence() < FaceDetector.Face.CONFIDENCE_THRESHOLD)
+                return;
+
+            // so this is the info we've got to work with out of the api
+            float eyesDistance = face.eyesDistance();
+            PointF killPoint = new PointF();    // this sets the given point to the point on the face
+            face.getMidPoint(killPoint);        // between the eyes, obviously they misnamed the fcn
+
+            float xRotation, yRotation, zRotation;
+            xRotation = face.pose(FaceDetector.Face.EULER_X);
+            yRotation = face.pose(FaceDetector.Face.EULER_Y);
+            zRotation = face.pose(FaceDetector.Face.EULER_Z);
+
+        }
+
+        int face_count = faceDetector.findFaces(bmp, faces);
+        Log.d("FaceDetector", face_count + " faces found in the image");
     }
 }
