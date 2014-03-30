@@ -131,4 +131,21 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         int face_count = faceDetector.findFaces(bmp, faces);
         Log.d("FaceDetector", face_count + " faces found in the image");
     }
+
+    private void drawRect() {
+//        System.out.println(face_count);
+//        for (int i = 0; i < face_count; i++) {
+//            bmp = bmp.copy(Bitmap.Config.ARGB_8888, true);
+//            Canvas canvas = new Canvas(bmp);
+//            Paint paint = new Paint();
+//            paint.setColor(Color.RED);
+//            canvas.drawBitmap(bmp, new Matrix(), null);
+//            PointF midpoint = new PointF();
+//            faces[i].getMidPoint(midpoint);
+//            canvas.drawRect(midpoint.x - faces[i].eyesDistance(), midpoint.y - faces[i].eyesDistance(),
+//                    midpoint.x + faces[i].eyesDistance(), midpoint.y + faces[i].eyesDistance(), paint);
+//        }
+//
+//        iv.setImageBitmap(bmp);
+    }
 }
