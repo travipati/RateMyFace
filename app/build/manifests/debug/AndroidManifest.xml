@@ -1,4 +1,5 @@
-<!-- From: file:/C:/Users/Teja/Documents/2014%20Winter/EECS%20545/RateMyFace/app/src/main/AndroidManifest.xml --><manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="ratemyface.namespace">
+<!-- From: file:/Users/Hephaestus/apps/RateMyFace/app/src/main/AndroidManifest.xml -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="ratemyface.namespace">
 
     <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="19"/>
     <uses-permission android:name="android.permission.CAMERA"/>

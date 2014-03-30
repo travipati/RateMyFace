@@ -22,12 +22,12 @@
         android:layout_below="@+id/btToggle"
         android:layout_centerHorizontal="true" />
 
-    <ImageView
+    <FrameLayout
         android:id="@+id/ivFace"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/btToggle"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/ratingBar" />
 
 </RelativeLayout>
-<!-- From: file:/C:/Users/Teja/Documents/2014%20Winter/EECS%20545/RateMyFace/app/src/main/res/layout/main.xml -->
+<!-- From: file:/Users/Hephaestus/apps/RateMyFace/app/src/main/res/layout/main.xml -->
