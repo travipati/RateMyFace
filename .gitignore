@@ -27,3 +27,7 @@ proguard/
 *.ipr
 *.iws
 .idea/
+
+# Android Studio
+.gradle/
+app/build/
