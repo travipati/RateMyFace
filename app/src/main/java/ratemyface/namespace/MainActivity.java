@@ -21,14 +21,16 @@ import android.app.Activity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+
+import util.CameraView;
 
 public class MainActivity extends Activity implements OnClickListener, Runnable {
 
 	Camera camera;
 	Button b;
-	ImageView iv;
     RatingBar rb;
 	boolean isCapturing = false;
 
@@ -51,13 +53,15 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
 	private void initialize() {
 		b = (Button) findViewById(R.id.btToggle);
 		b.setOnClickListener(this);
-        iv = (ImageView) findViewById(R.id.ivFace);
         rb = (RatingBar) findViewById(R.id.ratingBar);
-
-        camera = getCameraInstance();
 
 		ScheduledExecutorService scheduleTaskExecutor = Executors.newScheduledThreadPool(5);
 		scheduleTaskExecutor.scheduleAtFixedRate(this, 0, 2, TimeUnit.SECONDS);
+
+        camera = getFrontCamera();
+        CameraView cv = new CameraView(this, camera);
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.ivFace);
+        frameLayout.addView(cv);
 	}
 
     public static Camera getCameraInstance() {
@@ -69,6 +73,18 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
             e.printStackTrace();
         }
         return c;
+    }
+
+    private Camera getFrontCamera(){
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        for(int i = 0; i < Camera.getNumberOfCameras(); i++){
+            Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT)
+                return Camera.open(i);
+        }
+
+        System.out.println("Front camera not found, opening default camera instead.");
+        return Camera.open();
     }
 
 	@Override
@@ -89,40 +105,44 @@ public class MainActivity extends Activity implements OnClickListener, Runnable 
 	@Override
 	public void run() {
 		if (isCapturing) {
+            PictureCallback myPictureCallback = new PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] bytes, Camera camera) {
+                    System.out.println("Camera " + camera.toString() + " got a picture");
+
+                    InputStream is = new ByteArrayInputStream(bytes);
+                    Bitmap bmp = BitmapFactory.decodeStream(is);
+
+                    if (bmp.getWidth() % 2 == 1)
+                        bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth()-1, bmp.getHeight());
+//
+                    FaceDetector.Face[] faces;
+                    FaceDetector face_detector = new FaceDetector(bmp.getWidth(), bmp.getHeight(), 5);
+                    faces = new FaceDetector.Face[5];
+                    int face_count = face_detector.findFaces(bmp, faces);
+                    System.out.println(face_count + " faces found in the image");
+//
+//                    System.out.println(face_count);
+//                    for (int i = 0; i < face_count; i++) {
+//                        bmp = bmp.copy(Bitmap.Config.ARGB_8888, true);
+//                        Canvas canvas = new Canvas(bmp);
+//                        Paint paint = new Paint();
+//                        paint.setColor(Color.RED);
+//                        canvas.drawBitmap(bmp, new Matrix(), null);
+//                        PointF midpoint = new PointF();
+//                        faces[i].getMidPoint(midpoint);
+//                        canvas.drawRect(midpoint.x - faces[i].eyesDistance(), midpoint.y - faces[i].eyesDistance(),
+//                                midpoint.x + faces[i].eyesDistance(), midpoint.y + faces[i].eyesDistance(), paint);
+//                    }
+//
+//                    iv.setImageBitmap(bmp);
+                }
+            };
+
 			camera.takePicture(null, null, myPictureCallback);
 		}
 	}
 
-	PictureCallback myPictureCallback = new PictureCallback() {
-		@Override
-		public void onPictureTaken(byte[] arg0, Camera arg1) {
 
-            InputStream is = new ByteArrayInputStream(arg0);
-            Bitmap bmp = BitmapFactory.decodeStream(is);
-
-            if (bmp.getWidth() % 2 == 1)
-                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth()-1, bmp.getHeight());
-
-            FaceDetector.Face[] faces;
-            FaceDetector face_detector = new FaceDetector(bmp.getWidth(), bmp.getHeight(), 5);
-            faces = new FaceDetector.Face[5];
-            int face_count = face_detector.findFaces(bmp, faces);
-
-            System.out.println(face_count);
-            for (int i = 0; i < face_count; i++) {
-                bmp = bmp.copy(Bitmap.Config.ARGB_8888, true);
-                Canvas canvas = new Canvas(bmp);
-                Paint paint = new Paint();
-                paint.setColor(Color.RED);
-                canvas.drawBitmap(bmp, new Matrix(), null);
-                PointF midpoint = new PointF();
-                faces[i].getMidPoint(midpoint);
-                canvas.drawRect(midpoint.x - faces[i].eyesDistance(), midpoint.y - faces[i].eyesDistance(),
-                        midpoint.x + faces[i].eyesDistance(), midpoint.y + faces[i].eyesDistance(), paint);
-            }
-
-            iv.setImageBitmap(bmp);
-		}
-	};
 
 }
