@@ -21,6 +21,7 @@ import java.io.IOException;
 
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     final static String TAG = "CameraView";
+    final static String FaceDetectorTAG = "FaceDetector";
 
     private SurfaceHolder mHolder;
     private Camera mCamera;
@@ -71,7 +72,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
             mCamera.setPreviewCallback(new Camera.PreviewCallback() {
                 @Override
                 public void onPreviewFrame(byte[] bytes, Camera camera) {
-                    Log.d(TAG, "Camera " + camera.toString() + " got a picture");
+                    // got a frame
                     if (camera.getParameters().getPreviewFormat() == ImageFormat.NV21) {}
                     else
                         return;
@@ -82,7 +83,34 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
                         return;
                     }
 
-                    analyzeImage(bmp);
+                    FaceDetector faceDetector = new FaceDetector(bmp.getWidth(), bmp.getHeight(), 1);
+                    FaceDetector.Face[] faces = new FaceDetector.Face[1];
+                    if(faceDetector.findFaces(bmp, faces) == 0){
+                        Log.d(FaceDetectorTAG, "No faces found");
+                        return;
+                    }
+
+                    for (FaceDetector.Face face : faces) {
+                        //filter bad ones
+                        if (face.confidence() < FaceDetector.Face.CONFIDENCE_THRESHOLD){
+                            Log.d(FaceDetectorTAG, "Face confidence: " + face.confidence() + " filtered out.");
+                            return;
+                        }
+
+                        // so this is the info we've got to work with out of the api
+                        float eyesDistance = face.eyesDistance();
+                        PointF killPoint = new PointF();    // this sets the given point to the point on the face
+                        face.getMidPoint(killPoint);        // between the eyes, obviously they misnamed the fcn
+
+                        float xRotation, yRotation, zRotation;
+                        xRotation = face.pose(FaceDetector.Face.EULER_X);
+                        yRotation = face.pose(FaceDetector.Face.EULER_Y);
+                        zRotation = face.pose(FaceDetector.Face.EULER_Z);
+                    }
+
+                    int face_count = faceDetector.findFaces(bmp, faces);
+                    Log.d("FaceDetector", face_count + " faces found in the image");
+//                    analyzeImage(bmp);
                 }
             });
 
@@ -98,38 +126,17 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
 
         YuvImage yuvImage = new YuvImage(bytes, ImageFormat.NV21, size.width, size.height, null);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        yuvImage.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, baos);
-        byte[] jdata = baos.toByteArray();
+        if (!yuvImage.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, baos))
+            return null;
 
+        byte[] jdata = baos.toByteArray();
         BitmapFactory.Options bitmapFatoryOptions = new BitmapFactory.Options();
         bitmapFatoryOptions.inPreferredConfig = Bitmap.Config.RGB_565;
         return BitmapFactory.decodeByteArray(jdata, 0, jdata.length, bitmapFatoryOptions);
     }
 
     private void analyzeImage(Bitmap bmp) {
-        FaceDetector faceDetector = new FaceDetector(bmp.getWidth(), bmp.getHeight(), 1);
-        FaceDetector.Face[] faces = new FaceDetector.Face[1];
-        faceDetector.findFaces(bmp, faces);
 
-        for (FaceDetector.Face face : faces) {
-            //filter bad ones
-            if (face.confidence() < FaceDetector.Face.CONFIDENCE_THRESHOLD)
-                return;
-
-            // so this is the info we've got to work with out of the api
-            float eyesDistance = face.eyesDistance();
-            PointF killPoint = new PointF();    // this sets the given point to the point on the face
-            face.getMidPoint(killPoint);        // between the eyes, obviously they misnamed the fcn
-
-            float xRotation, yRotation, zRotation;
-            xRotation = face.pose(FaceDetector.Face.EULER_X);
-            yRotation = face.pose(FaceDetector.Face.EULER_Y);
-            zRotation = face.pose(FaceDetector.Face.EULER_Z);
-
-        }
-
-        int face_count = faceDetector.findFaces(bmp, faces);
-        Log.d("FaceDetector", face_count + " faces found in the image");
     }
 
     private void drawRect() {
