@@ -83,18 +83,23 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
                         return;
                     }
 
+                    Log.d("FaceDetector", analyzeImage(bmp) + " faces found in the image");
+                }
+
+                private int analyzeImage(Bitmap bmp) {
                     FaceDetector faceDetector = new FaceDetector(bmp.getWidth(), bmp.getHeight(), 1);
                     FaceDetector.Face[] faces = new FaceDetector.Face[1];
-                    if(faceDetector.findFaces(bmp, faces) == 0){
+                    int facesFound = faceDetector.findFaces(bmp, faces);
+                    if(facesFound == 0){
                         Log.d(FaceDetectorTAG, "No faces found");
-                        return;
+                        return 0;
                     }
 
                     for (FaceDetector.Face face : faces) {
                         //filter bad ones
                         if (face.confidence() < FaceDetector.Face.CONFIDENCE_THRESHOLD){
                             Log.d(FaceDetectorTAG, "Face confidence: " + face.confidence() + " filtered out.");
-                            return;
+                            return 0;
                         }
 
                         // so this is the info we've got to work with out of the api
@@ -108,9 +113,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
                         zRotation = face.pose(FaceDetector.Face.EULER_Z);
                     }
 
-                    int face_count = faceDetector.findFaces(bmp, faces);
-                    Log.d("FaceDetector", face_count + " faces found in the image");
-//                    analyzeImage(bmp);
+                    return facesFound;
                 }
             });
 

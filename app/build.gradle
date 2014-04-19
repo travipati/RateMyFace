@@ -19,4 +19,5 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:+'
+    compile files('libs/TarsosDSPAndroid-v3.jar')
 }
